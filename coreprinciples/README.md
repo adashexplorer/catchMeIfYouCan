@@ -85,3 +85,11 @@ graph TD
     D --> D4(AssertionError)
     D --> D5(LinkageError)
 ```
+### Explanation -
+- `Object` - The base class for all Java classes including exceptions & errors.
+- `Throwable` - The root for the exception hierarchy and a direct subclass of `Object`. Any object representing an error or exceptional event must be a subclass of `Throwable`.
+- `Exception` can be further categorized into 2 parts.
+    - Checked Exception / Compile Time Exception
+    - Unchecked Exception / `RuntimeException`
+- `Error` - Represents severe problems, usually related to the `Java Virtual Machine (JVM)` or system resources, that are typically irrecoverable. Errors are not meant to be caught or handled
+  by applications.
