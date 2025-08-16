@@ -26,6 +26,27 @@
 ## Why do we need an Exception Handling ?
 
 
+## Advantages of Exception Handling ?
+```mermaid
+---
+config:
+  theme: neo-dark
+  look: neo
+  layout: elk
+---
+flowchart TD
+    A["Program Execution"] --> B{"Error Occurs?"}
+    B -- No --> C["Normal Flow Continues"]
+    B -- Yes --> D["Without Exception Handling"] & E["With Exception Handling"]
+    D --> D1["Abrupt Program Termination"] & D2["Unfriendly Error Messages"] & D3["Data Loss / Incomplete Processing"]
+    E --> E1["Exception Object Created"] & E2["Search for Matching Catch Block"]
+    E2 -- Found --> E3["Handle Error Gracefully"]
+    E2 -- Not Found --> E4["Default Handler: Print Stack Trace"]
+    E3 --> E5["Program Continues Safely"]
+    E4 --> E6["Controlled Termination"]
+```
+
+
 ```java
      Class ExceptionDemo {
             public static void main(String[] args) {
