@@ -24,7 +24,25 @@
 > - By handling exceptions, Java enables developers to create robust and fault-tolerant applications.
 
 ## Why do we need an Exception Handling ?
+```mermaid
+---
+config:
+  theme: mc
+---
+mindmap
+  root((Why Exception Handling?))
+    Abrupt Termination
+      Prevent program from crashing unexpectedly
+    Error Messages
+      Provide meaningful messages to user
+    Data Safety
+      Avoid data corruption / loss
+    Debugging
+      Helps track issues with stack trace
+    Robustness
+      Makes program reliable and maintainable
 
+```
 
 ## Advantages of Exception Handling ?
 ```mermaid
