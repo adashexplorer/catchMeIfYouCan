@@ -64,6 +64,16 @@ flowchart TD
     E4 --> E6["Controlled Termination"]
 ```
 
+## Difference between `Exception` & `Error`
+| Aspect                | Exception                                                                 | Error                                                                 |
+|------------------------|---------------------------------------------------------------------------|----------------------------------------------------------------------|
+| Definition             | Represents conditions that a program can anticipate and handle gracefully | Represents serious issues that occur at runtime, mostly beyond the control of the program |
+| Recoverability         | Usually recoverable with proper handling                                  | Generally not recoverable                                            |
+| Handling Mechanism     | Can be caught and handled using `try-catch` blocks                        | Not recommended to catch; often leads to unstable program state      |
+| Examples               | `IOException`, `SQLException`, `NullPointerException`, `ClassNotFoundException` | `OutOfMemoryError`, `StackOverflowError`, `VirtualMachineError`      |
+| Origin                 | Mostly due to programming mistakes or external resource failures          | Mostly due to JVM limitations, hardware failure, or system crash     |
+| Program Continuation   | Program can often continue after handling the exception                   | Program usually terminates abnormally                                |
+| Part of                | `java.lang.Exception` class                                               | `java.lang.Error` class                                              |
 
 ```java
      Class ExceptionDemo {
