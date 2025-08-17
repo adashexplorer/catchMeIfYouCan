@@ -299,6 +299,131 @@ config:
         }
    }
   ```
+  
 
-   
+## Checked vs UnChecked Exceptions :
+- **Checked Exceptions** : These exceptions are checked at compile time, forcing the programmer to handle them explicitly.
+- **Unchecked Exceptions** : These exceptions are checked at runtime and do not require handling at compile time. 
+
+### Checked Exceptions 
+- These are the exceptions that are checked at compile time.
+- If a method throws checked exception, then the exception must be handled using a `try-catch` block and declared the exception in the method signature
+  using the `throws` keyword.
+- Checked exceptions represent invalid conditions in areas outside the immediate control of the program like memory, network, file system etc.
+- Any checked exception is a subclass of `Exception`.
+- Unlike Unchecked exceptions, checked exceptions must be either caught by the caller or listed as part of the method signature using the `throws` keyword.
+- Checked exceptions can be categorized into 2 parts.
+    - Fully Checked Exception 
+    - Partially Checked Exception
+
+### Unchecked Exceptions
+
+
+## Important points to note :
+### POINT - 1
+### Why JAVA introduced `Checked Exceptions` ? Why cannot everything be put inside `Unchecked Exceptions` ?
+```mermaid
+flowchart TD
+    A["Program Execution"] --> B{"Error Occurs?"}
+    B -- No --> C["Normal Flow Continues"]
+
+    B -- Yes --> D["If Everything Unchecked"]
+    B -- Yes --> E["With Checked + Unchecked"]
+
+    %% Unchecked only
+    D --> D1["Error discovered only at runtime"]
+    D1 --> D2["Program may crash unexpectedly"]
+    D2 --> D3["No compile-time guarantee of handling"]
+    D3 --> D4["Developer might miss handling external issues (I/O, DB, Network)"]
+
+    %% Checked + Unchecked
+    E --> E1["Compiler forces handling of recoverable issues (Checked)"]
+    E1 --> E2["Improves reliability for external problems"]
+    E --> E3["Unchecked reserved for programmer mistakes (bugs)"]
+    E2 --> E4["Balanced approach: safer + flexible"]
+
+    D --- E
+```
+- Forcing developers to handle critical failures (Checked Exceptions)
+   - Some failures cannot be ignored safely (e.g., IOException, SQLException).
+   - If everything were runtime exceptions, a careless developer might just skip handling them → leading to data loss, corrupted files, or security issues.
+   - By making them checked, Java forces you to acknowledge and handle them either by:
+       - Catching with try-catch, OR
+       - Declaring with throws in method signature.
+
+```java
+import java.io.FileReader;
+
+FileReader fr = new FileReader("abc.txt"); // FileNotFoundException must be handled
+```
+- Separating developer errors vs external failures
+  - Unchecked exceptions (Runtime) → represent programming mistakes that are not expected to be recovered from.
+      - Examples: `NullPointerException`, `ArrayIndexOutOfBoundsException`, `IllegalArgumentException`.
+      - They indicate bugs in the code logic → should be fixed in development, not handled at runtime.
+  - Checked exceptions → represent external problems (files, DB, network, resources) that the program can anticipate and recover from.
+- Encouraging robust & reliable programs
+  - Checked exceptions were meant to make enterprise applications safer.
+  - Especially in the 90's, when Java was designed for large-scale business apps, robust error handling was critical.
+- Why not make everything runtime ?
+  - If everything were unchecked:
+      - Developers might forget to handle critical issues (file not found, DB connection failure)
+      - Code would compile fine, but would blow up at runtime unexpectedly.
+      - larger systems would become unreliable.
+
+### Code analysis -
+1. **Checked Exception (Compile-time) example**
+```java
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class CheckedExample {
+    public static void main(String[] args) {
+        try {
+            // Trying to open a file that may or may not exist
+            FileReader f = new FileReader("abc.txt");
+            BufferedReader b = new BufferedReader(f);
+            System.out.println(b.readLine());
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
+```
+- `FileReader` constructor can throw `FileNotFoundException` (a checked exception).
+- The compiler forces you to wrap in `try-catch` or declare `throws IOException` in the method.
+- Why ? Because missing files, permission issues, disk errors --> are external problems you must plan for.
+
+2. **Unchecked Exception (Runtime) example**
+```java
+public class UncheckedExample {
+    public static void main(String[] args) {
+        int[] arr = {10, 20, 30};
+        
+        // Accessing out of bounds index
+        System.out.println(arr[5]);  // Runtime error: ArrayIndexOutOfBoundsException
+    }
+}
+```
+- This is a programmer mistake (bad index)
+- Compiler does not ask you to handle it, because the right solution is to fix the bug -> not to surround every array access with `try-catch` block.
+
+3. **What if all were `Runtime` exceptions ?**
+```java
+import java.io.*;
+
+public class AllUncheckedExample {
+    public static void main(String[] args) throws Exception {
+        // If IOException was unchecked, compiler wouldn't complain
+        FileReader fr = new FileReader("abc.txt");
+        BufferedReader br = new BufferedReader(fr);
+        System.out.println(br.readLine());
+    }
+}
+```
+📌 Problem:
+- Program compiles fine even if we don't handle missing file.
+- At runtime -> if file is absent -> app crashes unexpectedly.
+- In a banking or medical system, this would be dangerous.
+That's why Java designers made I/O, DB, network etc Checked exceptions -> You must consciously handle them.
 
