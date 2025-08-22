@@ -313,10 +313,14 @@ config:
 - Any checked exception is a subclass of `Exception`.
 - Unlike Unchecked exceptions, checked exceptions must be either caught by the caller or listed as part of the method signature using the `throws` keyword.
 - Checked exceptions can be categorized into 2 parts.
-    - Fully Checked Exception 
-    - Partially Checked Exception
+    - `Fully Checked Exception` - A checked exception where all of its child classes are also checked. (E.g. `IOException`, `InterruptedException`)
+    - `Partially Checked Exception` - A checked exception where some of its child classes are unchecked. (E.g. `Exception`)
 
 ### Unchecked Exceptions
+- These are the exceptions that are not checked at compile time.
+- In Java, exception classes under `Error` & `RuntimeException` classes are unchecked exceptions, everything else under `Throwable` is checked.
+- These are runtime exceptions that are not required to be caught or declared in a `throws` clause.
+- These exceptions are caused by programming errors, such as attempting to access index out of bounds in an array or attempting to divide by zero.
 
 
 ## Important points to note :
@@ -425,5 +429,8 @@ public class AllUncheckedExample {
 - Program compiles fine even if we don't handle missing file.
 - At runtime -> if file is absent -> app crashes unexpectedly.
 - In a banking or medical system, this would be dangerous.
-That's why Java designers made I/O, DB, network etc Checked exceptions -> You must consciously handle them.
+That's why Java designers made I/O, DB, network etc. Checked exceptions -> You must consciously handle them.
+
+
+
 
