@@ -76,19 +76,19 @@ flowchart TD
 | Part of                | `java.lang.Exception` class                                               | `java.lang.Error` class                                              |
 
 ```java
-     Class ExceptionDemo {
-            public static void main(String[] args) {
-                int n = 10;
-                int m = 0;
+class ExceptionDemo {
+    public static void main(String[] args) {
+        int n = 10;
+        int m = 0;
                 
                 int ans = n / m;
                 // This line never gets executed as on the above line an exception has occurred.
                 System.out.println("Result after divide by zero: " + ans);
-            }
-        }
-        /**
-         *    This throws ArithmeticException
-        **/
+    }
+}
+/**
+ *    This throws ArithmeticException
+ **/
 ```
 
 
@@ -288,7 +288,7 @@ config:
             super(message);
         }
    }
-   class class Test {
+   class Test {
         public static void main(String[] args) {
             new Test().process();
             System.out.println("This line will NOT execute if exception is not caught");
