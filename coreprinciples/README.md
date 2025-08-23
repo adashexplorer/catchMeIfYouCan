@@ -533,4 +533,239 @@ public class FinalizeDemo {
 
 
 
+## `throw` & `throws`
+
+### `throw`
+- The `throw` keyword in Java is used to explicitly throw an exception from a method or any block of code.
+- Both `Checked` & `Unchecked` exception can be thrown.
+- syntax `throw instance` e.g. `throw new ArithmeticException("/by zero");`
+- The throw instance must be an object of `Throwable` or its subclass i.e. `Exception`
+#### Example - 1
+```shell
+public void divide(int a, int b) {
+    if (b == 0) {
+        throw new ArithmeticException("Division by zero is not allowed");
+    }
+    System.out.println(a / b);
+}
+```
+#### Example - 2
+```shell
+public void readFile(String path) throws IOException {
+    FileReader reader = new FileReader(path); // IOException may occur
+    // ...
+}
+```
+
+```mermaid
+flowchart TD
+    A[Program Execution] --> B[throw statement executed]
+    B --> C[Check nearest enclosing try block]
+    C --> D{Matching catch block found?}
+    D -- Yes --> E[Transfer control to catch block]
+    D -- No --> F[Check next enclosing try block]
+    F --> G{Any more enclosing try blocks?}
+    G -- Yes --> C
+    G -- No --> H[Default Exception Handler invoked]
+    H --> I[Program halted]
+```
+#### Example - 1
+## Matching `catch` block found
+```java
+public class ThrowDemo1 {
+    public static void main(String[] args) {
+        try {
+            System.out.println("Inside try block...");
+            throw new IllegalArgumentException("Invalid input!"); // execution stops here
+        } catch (IllegalArgumentException e) {
+            System.out.println("Caught exception: " + e.getMessage());
+        }
+
+        System.out.println("Program continues normally after handling exception.");
+    }
+}
+/**
+ *   Output -
+ *   Inside try block
+ *   Caught exception : Invalid input
+ *   Program continues normally after handling exception
+ */
+```
+✅ Here, the thrown exception is caught immediately by the matching `catch` block. So the program continues.
+
+#### Example - 2
+## Checked at outer `try`
+```java
+public class ThrowDemo2 {
+    public static void main(String[] args) {
+        try {
+            try {
+                System.out.println("Inner try...");
+                throw new NullPointerException("Something went wrong!");
+            } catch (IllegalArgumentException e) {
+                System.out.println("Caught IllegalArgumentException");
+            }
+        } catch (NullPointerException e) {
+            System.out.println("Caught in outer catch: " + e);
+        }
+    }
+}
+/**
+ *   Inner try...
+ *   Caught in outer catch: java.lang.NullPointerException: Something went wrong!
+ */
+```
+✅ Since the `inner catch` does not match, the exception bubbles up and is caught by the `outer catch`
+
+#### Example - 3
+## No matching `catch` -> Default handler halts program
+```java
+public class ThrowDemo3 {
+    public static void main(String[] args) {
+        try {
+            System.out.println("About to throw...");
+            throw new ArrayIndexOutOfBoundsException("Index issue!");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Caught IllegalArgumentException");
+        }
+
+        // This line will never execute because no catch matched
+        System.out.println("End of program.");
+    }
+}
+/**
+ * About to throw...
+ * Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: Index issue!
+ * at ThrowDemo3.main(ThrowDemo3.java:5)
+ */
+```
+❌ No catch matched → the default exception handler prints stack trace and halts program.
+
+
+## Note -
+## Point 1
+```mermaid
+flowchart TD
+    A[Exception in Java] --> B{Type?}
+
+    %% Checked
+    B --> C[Checked Exception extends Exception, not RuntimeException]
+    C --> C1[Built-in: IOException, SQLException, etc.]
+    C --> C2[Custom: extends Exception]
+    C1 --> D1[Must be either Caught OR Declared with throws]
+    C2 --> D2[Must be either Caught OR Declared with throws]
+
+    %% Unchecked
+    B --> E[Unchecked Exception extends RuntimeException]
+    E --> E1[Built-in: NullPointerException, ArithmeticException, etc.]
+    E --> E2[Custom: extends RuntimeException]
+    E1 --> F1[Compiler does NOT force handling Optional catch/throws]
+    E2 --> F2[Compiler does NOT force handling Optional catch/throws]
+
+    %% Errors
+    B --> G[Error extends Error]
+    G --> H[Fatal issues: OutOfMemoryError, StackOverflowError, etc.]
+    H --> I[Should NOT be caught in normal code]
+```
+✅ Explanation -
+- If it's a Checked Exception (`extends Exception`) => Java Compiler forces you to `either catch or declare with throws keyword.`
+- If it's an Unchecked Exception (`extends RuntimeException`) => Compiler does not care; you may handle, but it's optional.
+- If it's an error => you normally don't handle (JVM level fatal issue)
+
+Case 1 -
+#### Checked Custom Exception 
+- If your custom exception extends Exception (but not RuntimeException), it becomes a checked exception. <br>
+➡️ Rule:
+    - You must either catch it or declare it using `throws`
+    - If you don't catch it or throws, compilation error occurs
+```java
+// Custom checked exception
+class MyCheckedException extends Exception {
+    public MyCheckedException(String message) {
+        super(message);
+    }
+}
+
+public class Demo {
+    public static void main(String[] args) {
+        try {
+            doWork();
+        } catch (MyCheckedException e) {   // ✅ must catch
+            System.out.println("Handled: " + e.getMessage());
+        }
+    }
+
+    static void doWork() throws MyCheckedException {  // ✅ or declare throws
+        throw new MyCheckedException("Something bad happened");
+    }
+}
+```
+
+Case 2 -
+#### Unchecked Custom Exception
+- If your custom exception `extends RuntimeException`, it is `unchecked`.<br>
+➡️ Rule:
+    - You don't need to catch or declare with throws. (though you can if you want)
+    - Program compiles fine without catch or throws.
+    - If exception actually happens, JVM will throw it at runtime and may terminate program unless caught.
+```java
+// Custom unchecked exception
+class MyUncheckedException extends RuntimeException {
+    public MyUncheckedException(String message) {
+        super(message);
+    }
+}
+
+public class Demo {
+    public static void main(String[] args) {
+        doWork();  // ❌ no need to catch or declare
+    }
+
+    static void doWork() {
+        throw new MyUncheckedException("Runtime failure");
+    }
+}
+```
+
+## Point 2
+```java
+public class ThrowDemo2 {
+    public static void main(String[] args) {
+        try {
+            try {
+                System.out.println("Inner try...");
+                int x = 10 / 0; // This throws ArithmeticException
+            } catch (IllegalArgumentException e) {
+                System.out.println("Caught IllegalArgumentException");
+            }
+        } catch (NullPointerException e) {
+            System.out.println("Caught in outer catch: " + e);
+        }
+    }
+}
+/**
+ *  O/P -
+ *  Inner try...
+ *  Exception in thread "main" java.lang.ArithmeticException: / by zero
+ *  at ThrowDemo2.main(ThrowDemo2.java:7)
+ */
+```
+Let's say in the above program, we have not thrown any exception (whether checked or unchecked) by ourselves. But, `int x = 10 / 0;` will eventually cause 
+`ArithmeticException` and it is a `RuntimeException`.
+So, here how its gets executed.
+1. Execution enters inner try and throws `ArithmeticException`.
+2. The inner catch block only handles `IllegalArgumentException`.
+   - But the thrown exception is `ArithmetciException`.
+   - So, the inner catch does not match -> exception remains unhandled inside inner try.
+3. The exception `bubbles up` (propagates) to the outer try-catch.
+   - Outer catch is only for `NullPointerException`
+   - But the thrown exception is `ArithmeticException`
+   - No match found again.
+4. Since no catch matches at any level, the exception is passed to the default exception handler.
+5. Default Handler:
+   - Prints the stack trace of the `ArithmeticException`.
+   - program terminates abnormally.
+
+
+
 
