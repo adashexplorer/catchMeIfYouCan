@@ -433,4 +433,104 @@ That's why Java designers made I/O, DB, network etc. Checked exceptions -> You m
 
 
 
+## `final` VS `finally` VS `finalize()`
+- `final` enforces immutability and prevents changes to variables, methods & classes.
+- `finally` ensures a block of code runs after a `try-catch` regardless of exceptions.
+- `finalize` is a method used for cleanup before an object is garbage collected.
+
+###  `final` -
+- This keyword is used with variables, methods & with classes to restrict modification.
+```java
+class FinalDemo {
+    public static void main(String[] args) {
+        // Non final variable
+        int a = 10;
+        
+        // final variable
+        final int b = 6;
+        
+        // Modify the non-final variable
+        a++;
+        // Modify the final variable
+        b++;
+    }
+}
+/**
+ *   O/P -
+ *   Java: Cannot assign a value to final variable 
+ */
+```
+- Declaring a variable as `final` means, we are not allowed to modify its value. Attempting to do so will result `Compilation error`
+- Similarly, `final` with methods & classes does impose certain more restrictions.
+
+### `finally`
+- It is used to create a block of code that always gets executed after the `try` block, regardless whether an exception occurs or not.
+```java
+class ExceptionDemoByHandlingException {
+    public static void main(String[] args) {
+        int n = 10;
+        int m = 0;
+
+        try {
+            // At below line, the exception occurs.
+            int ans = n / m;
+            // This never gets executed as the control goes to `catch` block to handle the exception
+            System.out.println("Result after divide by zero: " + ans);
+        } catch (ArithmeticException arithmeticException) {
+            /*
+                    Exception is handled here.
+             */
+            System.out.println("A number cannot be divided by zero. " +
+                    "Exception occurred. Reason :" + arithmeticException);
+        } finally {
+            /*
+                    finally block gets executed under any circumstances.
+             */
+            System.out.println("Program is continuing after handling the exception");
+        }
+    }
+}
+```
+
+### `finalize()`
+- It is called by the garbage collector just before an object is removed from memory.
+- It allows use to perform cleanup activity.
+- Once the `finalize()` completes, Garbage collector destroys that object.
+- `finalize()` is present in `Object` class
+
+## `finalize()` is deprecated from Java 9 and should not be used in modern applications. It is recommended to use `try-with-resources` or other clean-up mechanisms instead of relying on `finalize()`
+
+```java
+public class FinalizeDemo {
+    public static void main(String[] args) {
+        FinalizeDemo demo = new FinalizeDemo();
+        System.out.println("Hashcode is: " + demo.hashCode());
+        // Making the object eligible for garbage collection
+        demo = null;
+        System.gc();
+        // Adding a short delay to allow Garbage Collector to act
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("End of Garbage Collection");
+    }
+    
+    // Defining the finalize()
+    @Override protected void finalize() {
+        System.out.println("Called the finalize() method");
+    }
+}
+/**
+ *  O/P -
+ *   Hashcode is: 1480010240
+ *   Called the finalize() method
+ *   End of Garbage Collection
+ */
+```
+- In the above example, an object `demo` is created and its hashcode is printed. The object is made available for garbage collection by setting it to `NULL` and invoking `System.gc()`
+
+
+
 
