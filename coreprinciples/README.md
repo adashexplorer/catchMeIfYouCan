@@ -767,5 +767,180 @@ So, here how its gets executed.
    - program terminates abnormally.
 
 
+### `throws`
+
+#### What is `throws` ?
+- It is a `method/ constructor` level declaration keyword.
+- It tells the compiler and caller that this method might pass an execution up instead of handling it.
+- It is part of the method signature.
+
+> 👉 Think of it as a warning label: <br>
+> "Hey caller", I might throw this kind of checked exception - handle it if you want to use me."
+
+
+#### What does `throws` do ?
+- It declares exceptions that can propagate out of the method.
+- It does not throw exceptions (that's `throw` keyword job)
+- It allows the caller to decide whether to handle the exception or further propagate it.
+
+#### When `throws` keyword is required ?
+- Required only for Checked Exceptions (Subclass of `Exception` excluding `RuntimeException`)
+- Unchecked Exceptions (RuntimeException & Error) don't require `throws`, though you can declare them for documentation.
+
+1. Checked Exceptions -> must use `throws` or `try-catch`
+```java
+import java.io.*;
+
+class FileReaderDemo {
+    // Declares: may throw IOException
+    static String readFile(String path) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(path));
+        return br.readLine();
+    }
+
+    public static void main(String[] args) {
+        try {
+            System.out.println(readFile("data.txt"));
+        } catch (IOException e) { // must handle
+            System.out.println("File problem: " + e.getMessage());
+        }
+    }
+}
+```
+✅ Without throws IOException here, it won’t compile because FileReader constructor can throw IOException.
+
+2. Unchecked Exception -> `throws` not required
+```java
+class DivideDemo {
+    static int divide(int a, int b) {
+        return a / b; // may throw ArithmeticException (unchecked)
+    }
+
+    public static void main(String[] args) {
+        System.out.println(divide(10, 0)); // Runtime crash, no compiler error
+    }
+}
+```
+✅ No need for throws ArithmeticException, compiler doesn’t force it.
+
+3. Propagation with `throws`
+```java
+import java.sql.*;
+
+class Dao {
+    String getData() throws SQLException {
+        throw new SQLException("DB not available");
+    }
+}
+
+class Service {
+    String fetch() throws SQLException { // propagates
+        return new Dao().getData();
+    }
+}
+
+public class App {
+    public static void main(String[] args) {
+        try {
+            System.out.println(new Service().fetch());
+        } catch (SQLException e) {
+            System.out.println("Handled at top: " + e.getMessage());
+        }
+    }
+}
+```
+✅ Exception “bubbles up” until handled.
+
+4. Constructor with `throws`
+```java
+import java.io.*;
+
+class Resource {
+    Resource() throws IOException {
+        throw new IOException("Failed init");
+    }
+}
+
+public class Demo {
+    public static void main(String[] args) {
+        try {
+            new Resource(); // must catch or declare
+        } catch (IOException e) {
+            System.out.println("Handled constructor error: " + e.getMessage());
+        }
+    }
+}
+```
+| Case               | `throws` Required? | Example                        |
+|--------------------|---------------------|--------------------------------|
+| **Checked Exception** (e.g., `IOException`) | ✅ Yes | `new FileReader("file.txt")` |
+| **Unchecked Exception** (e.g., `NullPointerException`) | ❌ No  | `int x = 5 / 0;` |
+| **Catching Locally** (handled inside method) | ❌ No  | try–catch inside same method |
+| **Propagate Further** (pass to caller) | ✅ Yes (for checked exceptions) | declaring `throws IOException` |
+
+
+
+```mermaid
+flowchart TD
+    A[Method may throw exception] --> B{Checked or Unchecked?}
+    B -- Checked --> C{Caught inside method?}
+    C -- Yes --> D[OK, no throws needed]
+    C -- No --> E[Declare with throws or compiler error]
+    B -- Unchecked --> F[No throws needed, optional for docs]
+```
+
+## `throws` is Java’s way of forcing you to acknowledge and deal with checked exceptions.
+
+### Notes -
+1. #### Can we write `throws` without `throw` ? <br>
+   👉 YES, you can write `throws` without actually using `throw` in the method body.
+   - The compiler only checks whether the method declares exceptions. (for checked ones)
+   - It does not force you to actually throw them inside the method.
+```java
+import java.io.IOException;
+
+class Demo {
+    // Declares but doesn't throw anything
+    static void test() throws IOException {
+        System.out.println("Hello, I declared IOException but didn't throw it!");
+    }
+
+    public static void main(String[] args) {
+        try {
+            test();
+        } catch (IOException e) {
+            System.out.println("Caught: " + e.getMessage());
+        }
+    }
+}
+```
+✅ This compiles and runs fine. <br>
+⚠️ But declaring unnecessary exceptions is bad practice, because it misleads callers into thinking they need to handle something that will never happen.
+
+2. #### Can we write `throw` without `throws` ?
+```java
+class Demo2 {
+    static void test() {
+        throw new ArithmeticException("Boom!"); // unchecked
+    }
+
+    public static void main(String[] args) {
+        test(); // No try-catch, no throws needed
+    }
+}
+```
+✅ Allowed because unchecked exceptions don’t need throws.
+
+#### 🔑 Rule of Thumb
+- `throws` can exist without `throw` (Legal, but misleading)
+- `throw` can exist without `throws` if it's an unchecked exception.
+- If you throw a checked exception, then throws (or catch) is mandatory.
+
+### 👉 throws is only a declaration (compiler-level), while throw is the action (runtime-level).
+
+3. If a method `throws` an exception (Checked or Unchecked), then is it mandatory for caller of that method to handle with `throws` or `try-catch` block. <br>
+   Also, if the method `throw` an exception & handle with `try-catch` within the same function. Then does the caller need to `throws` that exception ?
+
+1️⃣ If the method throws a Checked Exception
 
 
