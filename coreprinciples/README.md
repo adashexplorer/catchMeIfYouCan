@@ -1015,3 +1015,51 @@ So, overall -
 - If exception handled inside same method -> caller free
 
 
+# Differences between different components :
+
+## `throw` vs `throws`
+| **Feature** | **`throw`** | **`throws`** |
+|-------------|-------------|---------------|
+| **Definition** | Used to actually throw (create and send) an exception object. | Used in a method signature to declare what exceptions a method may throw. |
+| **Purpose** | To signal that an exception has occurred. | To tell the caller: *“Be ready, I might throw these exceptions.”* |
+| **Position in Code** | Appears inside a method or block, followed by an exception object. | Appears in method declaration/signature, followed by exception class(es). |
+| **Number of Exceptions** | Can throw only **one exception object** at a time. | Can declare **multiple exception types**, separated by commas. |
+| **Checked Exception Handling** | Must throw an object of type **Throwable** (usually `Exception` or subclass). | Required when the method can throw **checked exceptions** and doesn’t handle them internally. |
+| **Compile-time Effect** | Triggers exception handling mechanism immediately. | No exception is thrown here; it only notifies the compiler about possible exceptions. |
+| **Example Usage** | ```java\nthrow new IOException("File not found");\n``` | ```java\nvoid readFile() throws IOException, SQLException\n``` |
+
+## `Exception` vs `Error`
+| Aspect                | Exception                                                                 | Error                                                                 |
+|------------------------|---------------------------------------------------------------------------|----------------------------------------------------------------------|
+| Definition             | Represents conditions that a program can anticipate and handle gracefully | Represents serious issues that occur at runtime, mostly beyond the control of the program |
+| Recoverability         | Usually recoverable with proper handling                                  | Generally not recoverable                                            |
+| Handling Mechanism     | Can be caught and handled using `try-catch` blocks                        | Not recommended to catch; often leads to unstable program state      |
+| Examples               | `IOException`, `SQLException`, `NullPointerException`, `ClassNotFoundException` | `OutOfMemoryError`, `StackOverflowError`, `VirtualMachineError`      |
+| Origin                 | Mostly due to programming mistakes or external resource failures          | Mostly due to JVM limitations, hardware failure, or system crash     |
+| Program Continuation   | Program can often continue after handling the exception                   | Program usually terminates abnormally                                |
+| Part of                | `java.lang.Exception` class                                               | `java.lang.Error` class                                              |
+
+## `Checked Exception` vs `Unchecked Exception`
+| **Feature** | **Checked Exception** | **Unchecked Exception** |
+|-------------|------------------------|--------------------------|
+| **Definition** | Exceptions that are **checked at compile-time**. Compiler ensures you handle them (either with `try-catch` or `throws`). | Exceptions that occur **at runtime**. Compiler does *not* force handling. |
+| **Hierarchy** | Subclasses of `Exception` (but **not** `RuntimeException`). | Subclasses of `RuntimeException`. |
+| **Compiler Check** | Must be **declared** in method signature with `throws` OR **caught** with `try-catch`. | Compiler **does not check**. Handling is optional. |
+| **When they occur** | Generally due to **external factors** (I/O, database, network). | Usually due to **programming errors** (null pointer, divide by zero, array out of bounds). |
+| **Examples (Built-in)** | `IOException`, `SQLException`, `ClassNotFoundException`, `FileNotFoundException`. | `NullPointerException`, `ArithmeticException`, `ArrayIndexOutOfBoundsException`, `IllegalArgumentException`. |
+| **Custom** | If your custom exception **extends `Exception`**, it is a Checked Exception. | If your custom exception **extends `RuntimeException`**, it is an Unchecked Exception. |
+| **Impact on Caller** | Caller is **forced** to handle or declare the exception. | Caller is **not forced** to handle. Program may crash if unhandled. |
+| **Best Practice** | Use when caller **must know** about the exception and handle it (I/O, database, validation). | Use when exception indicates **programmer mistake** that should be fixed, not just caught. |
+
+
+## `final` vs `finally` vs `finalize()`
+| **Feature** | **final** | **finally** | **finalize()** |
+|-------------|------------|--------------|----------------|
+| **Type** | Keyword | Block | Method |
+| **Belongs To** | Variables, Methods, Classes | Exception Handling (`try-catch`) | `Object` Class |
+| **Purpose** | Restricts modification (constant, non-overridable method, non-inheritable class) | Ensures code always executes (cleanup) | Cleanup before object is destroyed by GC |
+| **When Used** | During class design | During exception handling | During garbage collection |
+| **Inheritance** | - `final class` → Cannot be extended <br> - `final method` → Cannot be overridden | Not related to inheritance | Can be overridden to add cleanup logic |
+| **Execution** | Compile-time restriction | Runs **always** after `try-catch` | Called **once** by Garbage Collector before object destruction |
+| **Example** | `final int x = 10;` <br> `final void display(){}` | `try { } catch { } finally { }` | `protected void finalize() { }` |
+| **Special Note** | Compile-time concept | Runtime execution guarantee | Deprecated since Java 9 |
