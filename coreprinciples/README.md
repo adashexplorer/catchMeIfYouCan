@@ -941,6 +941,77 @@ class Demo2 {
 3. If a method `throws` an exception (Checked or Unchecked), then is it mandatory for caller of that method to handle with `throws` or `try-catch` block. <br>
    Also, if the method `throw` an exception & handle with `try-catch` within the same function. Then does the caller need to `throws` that exception ?
 
-1️⃣ If the method throws a Checked Exception
+#### 1️⃣ If the method throws a Checked Exception
+- The caller must either :
+   - Handle it with `try-catch`, OR
+   - Declare it again with `throws`
+- Because the compiler forces handling of checked exceptions.
+
+✅ Example (Checked Exception – must handle or declare):
+```java
+import java.io.IOException;
+
+class Demo {
+    static void risky() throws IOException {
+        throw new IOException("Disk error!");
+    }
+
+    public static void main(String[] args) {
+        try {
+            risky(); // Must handle because risky() declares IOException
+        } catch (IOException e) {
+            System.out.println("Handled: " + e.getMessage());
+        }
+    }
+}
+```
+👉 If you remove the try-catch, compiler will force you to add throws IOException in main.
+
+#### 2️⃣ If the method throws an Unchecked Exception
+- Caller is not forced to handle or declare.
+- But it may still choose to catch it.
+
+✅ Example (Unchecked Exception – no need to handle/declare):
+```java
+class Demo2 {
+    static void risky() {
+        throw new ArithmeticException("Divide by zero");
+    }
+
+    public static void main(String[] args) {
+        risky(); // No compile error, even if not handled
+        System.out.println("Still compiles fine!");
+    }
+}
+```
+
+#### 3️⃣ If the method handles the exception inside itself
+- The caller does not need to declare or handle it again.
+- Because the exception **never** escapes the method.
+
+✅ Example:
+```java
+import java.io.IOException;
+
+class Demo3 {
+    static void risky() {
+        try {
+            throw new IOException("File not found!");
+        } catch (IOException e) {
+            System.out.println("Handled inside risky(): " + e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+        risky(); // Caller is free, no throws/try required
+        System.out.println("No need for caller to declare or handle.");
+    }
+}
+```
+
+So, overall -
+- Checked exception thrown -> called must handle/declare.
+- Unchecked exception thrown -> caller not forced.
+- If exception handled inside same method -> caller free
 
 
